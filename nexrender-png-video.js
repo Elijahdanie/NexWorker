@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 const fs = require('fs');
-const { exec } = require('child_process');
+const { exec, execSync } = require('child_process');
 
 const execution = async (job, settings, {input, params})=>{
     try {
@@ -13,22 +13,15 @@ const execution = async (job, settings, {input, params})=>{
             fs.mkdirSync(destination);
         }
         let audiofile = await copyFiles(parentPath, destination, input);
-        let cmd = `fire.sh ${destination} ${audiofile} ${params.frame} ${destination}/${params.output}.mp4`;
-        exec(cmd, (err, stdout, stderr)=>{
-            if(err)
-            {
-                console.log(err, stderr);
-            }
-            console.log(err, stderr, stdout);
-            let finalOuput = `${destination}/${params.output}.mp4`;
+        //let cmd = `render.sh ${destination} ${audiofile} ${params.frame} ${destination}/${params.output}.mp4`;
+        let mainformat = `C://ffmpeg/ffmpeg.exe -framerate ${params.frame} -i "${destination}/result_%05d.png" -i ${audiofile} -c:a copy -shortest -c:v libx264 -pix_fmt yuv420p ${destination}/${params.output}.mp4`
+        execSync(mainformat, {stdio: 'inherit'});
+        let finalOuput = `${destination}/${params.output}.mp4`;
             if(fs.existsSync(finalOuput)){
             fs.copyFileSync(finalOuput, `${outputFolder}/${params.output}.mp4`);
             clean(destination);
-            console.log(stdout);
             }else{
-                console.log('cannot find result file', cmd);
-            }
-        });
+                console.log('cannot find result file');}
     } catch (error) {
         console.log(error);
     }
