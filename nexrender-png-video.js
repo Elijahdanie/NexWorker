@@ -4,22 +4,34 @@ const fs = require('fs');
 const { exec } = require('child_process');
 
 const execution = async (job, settings, {input, params})=>{
-    const parentPath = settings.workpath + `${job.uid}`;
-    const destination = settings.output + `/${params.output}`;
-    if(!fs.existsSync(destination)){
-        fs.mkdirSync(destination);
-    }
-    let audiofile = await copyFiles(parentPath, destination, input);
-    exec(`$ ./render.sh ${destination} ${audiofile} ${params.frame} ${params.output}`, (err, stdout, stderr)=>{
-        if(err || stderr)
-        {
-            console.log(err, stderr);
-            return;
+    try {
+        
+        const parentPath = settings.workpath + `/${job.uid}`;
+        let outputFolder = 'C://Users/Administrator/Documents/Nexrender/Output';
+        const destination = outputFolder + `/${params.output}`;
+        if(!fs.existsSync(destination)){
+            fs.mkdirSync(destination);
         }
-        fs.copyFileSync(`${destination}/result.mp4`, `${job.output}/${params.output}.mp4`);
-        clean(destination);
-        console.log(stdout);
-});
+        let audiofile = await copyFiles(parentPath, destination, input);
+        let cmd = `fire.sh ${destination} ${audiofile} ${params.frame} ${destination}/${params.output}.mp4`;
+        exec(cmd, (err, stdout, stderr)=>{
+            if(err)
+            {
+                console.log(err, stderr);
+            }
+            console.log(err, stderr, stdout);
+            let finalOuput = `${destination}/${params.output}.mp4`;
+            if(fs.existsSync(finalOuput)){
+            fs.copyFileSync(finalOuput, `${outputFolder}/${params.output}.mp4`);
+            clean(destination);
+            console.log(stdout);
+            }else{
+                console.log('cannot find result file', cmd);
+            }
+        });
+    } catch (error) {
+        console.log(error);
+    }
 }
 
 const clean = (path) => {
@@ -33,18 +45,20 @@ const clean = (path) => {
 
 const copyFiles = (parent, target, format) =>
 {
-    return Promise((resolve, reject)=>{
+    return new Promise((resolve, reject)=>{
   const path =parent;
   let files = fs.readdirSync(parent);
-  let audiofile = files.filter(file=>file.includes('.mp3'));
+  let audiofileName = files.filter(file=>file.includes('.mp3'));
+  let audiofilePath = parent + `/${audiofileName}`;
   //copy images
-  exec(`mv *.${format} ${audiofile} ${target}`, (err, stdout, stderr)=>{
+  exec(`mv ${parent}/*.${format} ${audiofilePath} ${target}`, (err, stdout, stderr)=>{
     if(err || stderr)
     {
+        console.log(stderr, err);
         reject(err);
     }
     console.log(stdout);
-    resolve(audiofile);
+    resolve(`${target}/${audiofileName}`);
   });
 });
 }
