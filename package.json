@@ -11,6 +11,7 @@
   "dependencies": {
     "@nexrender/worker": "^1.39.0",
     "axios": "^0.26.1",
+    "nexrender-action-normalize-color": "github:dberget/nexrender-action-normalize-color",
     "nexrender-action-upload-s3-presigned": "github:Elijahdanie/nexrender-action-upload-s3-presigned"
   }
 }
