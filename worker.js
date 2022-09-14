@@ -1,5 +1,4 @@
 const { start } = require('@nexrender/worker')
-const execution = require('./nexrender-png-video');
 const main = async () => {
     const serverHost = 'http://localhost:3000'
     const serverSecret = process.argv[3]
@@ -12,9 +11,6 @@ const main = async () => {
         debug: true,
 	stopOnError: false,
         actions: {
-            "nexrender-png-video": (job, settings, {input, params}, type) => {
-                execution(job, settings, {input, params}, type);
-            }
         },
     })
 }
